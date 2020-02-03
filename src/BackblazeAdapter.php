@@ -27,7 +27,7 @@ class BackblazeAdapter extends AbstractAdapter
      */
     public function has($path)
     {
-        return $this->getClient()->fileExists(['FileName' => $path, 'BucketName' => $this->bucketName]);
+        return $this->getClient()->fileExists(['FileName' => $this->applyPathPrefix($path), 'BucketName' => $this->bucketName]);
     }
 
     /**
@@ -37,7 +37,7 @@ class BackblazeAdapter extends AbstractAdapter
     {
         $file = $this->getClient()->upload([
             'BucketName' => $this->bucketName,
-            'FileName'   => $path,
+            'FileName'   => $this->applyPathPrefix($path),
             'Body'       => $contents,
         ]);
 
@@ -51,7 +51,7 @@ class BackblazeAdapter extends AbstractAdapter
     {
         $file = $this->getClient()->upload([
             'BucketName' => $this->bucketName,
-            'FileName'   => $path,
+            'FileName'   => $this->applyPathPrefix($path),
             'Body'       => $resource,
         ]);
 
@@ -65,7 +65,7 @@ class BackblazeAdapter extends AbstractAdapter
     {
         $file = $this->getClient()->upload([
             'BucketName' => $this->bucketName,
-            'FileName'   => $path,
+            'FileName'   => $this->applyPathPrefix($path),
             'Body'       => $contents,
         ]);
 
@@ -79,7 +79,7 @@ class BackblazeAdapter extends AbstractAdapter
     {
         $file = $this->getClient()->upload([
             'BucketName' => $this->bucketName,
-            'FileName'   => $path,
+            'FileName'   => $this->applyPathPrefix($path),
             'Body'       => $resource,
         ]);
 
@@ -93,7 +93,7 @@ class BackblazeAdapter extends AbstractAdapter
     {
         $file = $this->getClient()->getFile([
             'BucketName' => $this->bucketName,
-            'FileName'   => $path,
+            'FileName'   => $this->applyPathPrefix($path),
         ]);
         $fileContent = $this->getClient()->download([
             'FileId' => $file->getId(),
@@ -110,7 +110,7 @@ class BackblazeAdapter extends AbstractAdapter
         $stream = Psr7\stream_for();
         $download = $this->getClient()->download([
             'BucketName' => $this->bucketName,
-            'FileName'   => $path,
+            'FileName'   => $this->applyPathPrefix($path),
             'SaveAs'     => $stream,
         ]);
         $stream->seek(0);
@@ -139,7 +139,7 @@ class BackblazeAdapter extends AbstractAdapter
     {
         return $this->getClient()->upload([
             'BucketName' => $this->bucketName,
-            'FileName'   => $newPath,
+            'FileName'   => $this->applyPathPrefix($path),
             'Body'       => @file_get_contents($path),
         ]);
     }
@@ -149,7 +149,7 @@ class BackblazeAdapter extends AbstractAdapter
      */
     public function delete($path)
     {
-        return $this->getClient()->deleteFile(['FileName' => $path, 'BucketName' => $this->bucketName]);
+        return $this->getClient()->deleteFile(['FileName' => $this->applyPathPrefix($path), 'BucketName' => $this->bucketName]);
     }
 
     /**
@@ -157,7 +157,7 @@ class BackblazeAdapter extends AbstractAdapter
      */
     public function deleteDir($path)
     {
-        return $this->getClient()->deleteFile(['FileName' => $path, 'BucketName' => $this->bucketName]);
+        return $this->getClient()->deleteFile(['FileName' => $this->applyPathPrefix($path), 'BucketName' => $this->bucketName]);
     }
 
     /**
@@ -167,7 +167,7 @@ class BackblazeAdapter extends AbstractAdapter
     {
         return $this->getClient()->upload([
             'BucketName' => $this->bucketName,
-            'FileName'   => $path,
+            'FileName'   => $this->applyPathPrefix($path),
             'Body'       => '',
         ]);
     }
@@ -193,7 +193,7 @@ class BackblazeAdapter extends AbstractAdapter
      */
     public function getSize($path)
     {
-        $file = $this->getClient()->getFile(['FileName' => $path, 'BucketName' => $this->bucketName]);
+        $file = $this->getClient()->getFile(['FileName' => $this->applyPathPrefix($path), 'BucketName' => $this->bucketName]);
 
         return $this->getFileInfo($file);
     }
@@ -203,7 +203,7 @@ class BackblazeAdapter extends AbstractAdapter
      */
     public function getTimestamp($path)
     {
-        $file = $this->getClient()->getFile(['FileName' => $path, 'BucketName' => $this->bucketName]);
+        $file = $this->getClient()->getFile(['FileName' => $this->applyPathPrefix($path), 'BucketName' => $this->bucketName]);
 
         return $this->getFileInfo($file);
     }
@@ -223,6 +223,7 @@ class BackblazeAdapter extends AbstractAdapter
     {
         $fileObjects = $this->getClient()->listFiles([
             'BucketName' => $this->bucketName,
+            'Prefix' => $this->getPathPrefix(),
         ]);
         if ($recursive === true && $directory === '') {
             $regex = '/^.*$/';
