@@ -247,6 +247,32 @@ class BackblazeAdapter extends AbstractAdapter
     }
 
     /**
+     * Get a temporary download-url.
+     *
+     * @param string $path
+     * @param int $secondsValid
+     * @return string
+     */
+    public function getTemporaryUrl(string $path, int $secondsValid = 600)
+    {
+        $downloadUrl = $this->client->getDownloadUrl([
+            'BucketName' => $this->bucketName,
+            'FileNamePrefix' => $path,
+        ]);
+
+        $authorizationSettings = $this->client->getDownloadAuthorization([
+            'BucketName' => $this->bucketName,
+            'FileNamePrefix' => $this->getPathPrefix(),
+            'ValidDurationInSeconds' => $secondsValid,
+        ]);
+
+        return sprintf('%s?Authorization=%s',
+            $downloadUrl,
+            $authorizationSettings['authorizationToken']
+        );
+    }
+
+    /**
      * Get file info.
      *
      * @param $file

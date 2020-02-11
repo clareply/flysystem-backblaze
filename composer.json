@@ -16,7 +16,7 @@
     "require": {
         "php": "^7.1.8",
         "league/flysystem": "~1.0",
-        "gliterd/backblaze-b2": "*",
+        "gliterd/backblaze-b2": "dev-feature/authorize-download-links",
         "psr/http-message-implementation": "*",
         "mikey179/vfsStream": "*"
     },
@@ -41,5 +41,11 @@
     },
     "config": {
         "sort-packages": true
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/clareply/backblaze-b2"
+        }
+    ]
 }
