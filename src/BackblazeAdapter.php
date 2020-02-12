@@ -3,7 +3,11 @@
 namespace Mhetreramesh\Flysystem;
 
 use BackblazeB2\Client;
+use DateTime;
+use DateTimeInterface;
+use Exception;
 use GuzzleHttp\Psr7;
+use InvalidArgumentException;
 use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Adapter\Polyfill\NotSupportingVisibilityTrait;
 use League\Flysystem\Config;
@@ -234,7 +238,7 @@ class BackblazeAdapter extends AbstractAdapter
         } elseif ($recursive === false && $directory !== '') {
             $regex = '/^'.preg_quote($directory).'\/(?!.*\\/).*$/';
         } else {
-            throw new \InvalidArgumentException();
+            throw new InvalidArgumentException();
         }
         $fileObjects = array_filter($fileObjects, function ($fileObject) use ($directory, $regex) {
             return 1 === preg_match($regex, $fileObject->getName());
@@ -250,20 +254,24 @@ class BackblazeAdapter extends AbstractAdapter
      * Get a temporary download-url.
      *
      * @param string $path
-     * @param int $secondsValid
+     * @param DateTimeInterface $expiration
+     * @param array $options
      * @return string
+     * @throws Exception
      */
-    public function getTemporaryUrl(string $path, int $secondsValid = 600)
+    public function getTemporaryUrl(string $path, DateTimeInterface $expiration, array $options = [])
     {
         $downloadUrl = $this->client->getDownloadUrl([
             'BucketName' => $this->bucketName,
             'FileNamePrefix' => $path,
         ]);
 
+        $now = new DateTime();
+
         $authorizationSettings = $this->client->getDownloadAuthorization([
             'BucketName' => $this->bucketName,
             'FileNamePrefix' => $this->getPathPrefix(),
-            'ValidDurationInSeconds' => $secondsValid,
+            'ValidDurationInSeconds' => $now->diff($expiration)->s,
         ]);
 
         return sprintf('%s?Authorization=%s',
