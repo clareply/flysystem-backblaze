@@ -271,7 +271,7 @@ class BackblazeAdapter extends AbstractAdapter
         $authorizationSettings = $this->client->getDownloadAuthorization([
             'BucketName' => $this->bucketName,
             'FileNamePrefix' => $this->getPathPrefix(),
-            'ValidDurationInSeconds' => $now->diff($expiration)->s,
+            'ValidDurationInSeconds' => $expiration->getTimestamp() - $now->getTimestamp(),
         ]);
 
         return sprintf('%s?Authorization=%s',
