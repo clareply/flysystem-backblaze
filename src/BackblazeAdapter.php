@@ -263,7 +263,7 @@ class BackblazeAdapter extends AbstractAdapter
     {
         $downloadUrl = $this->client->getDownloadUrl([
             'BucketName' => $this->bucketName,
-            'FileNamePrefix' => $path,
+            'FileName' => $path,
         ]);
 
         $now = new DateTime();
