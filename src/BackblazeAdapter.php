@@ -3,6 +3,7 @@
 namespace Mhetreramesh\Flysystem;
 
 use BackblazeB2\Client;
+use BackblazeB2\File;
 use DateTime;
 use DateTimeInterface;
 use Exception;
@@ -261,10 +262,7 @@ class BackblazeAdapter extends AbstractAdapter
      */
     public function getTemporaryUrl(string $path, DateTimeInterface $expiration, array $options = [])
     {
-        $downloadUrl = $this->client->getDownloadUrl([
-            'BucketName' => $this->bucketName,
-            'FileName' => $path,
-        ]);
+        $downloadUrl = $this->getDownloadUrl($path);
 
         $now = new DateTime();
 
@@ -281,21 +279,43 @@ class BackblazeAdapter extends AbstractAdapter
     }
 
     /**
+     * Alias for getDownloadUrl
+     *
+     * @param string $path
+     * @return string
+     */
+    public function getUrl(string $path)
+    {
+        return $this->getDownloadUrl($path);
+    }
+
+    /**
+     * Get a download-url
+     *
+     * @param string $path
+     * @return string|null
+     */
+    protected function getDownloadUrl(string $path)
+    {
+        return $this->client->getDownloadUrl([
+            'BucketName' => $this->bucketName,
+            'FileName' => $path,
+        ]);
+    }
+
+    /**
      * Get file info.
      *
      * @param $file
-     *
      * @return array
      */
-    protected function getFileInfo($file)
+    protected function getFileInfo(File $file)
     {
-        $normalized = [
+        return [
             'type'      => 'file',
             'path'      => $file->getName(),
             'timestamp' => substr($file->getUploadTimestamp(), 0, -3),
             'size'      => $file->getSize(),
         ];
-
-        return $normalized;
     }
 }
